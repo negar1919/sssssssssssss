@@ -1,0 +1,30 @@
+name: Deploy Vite + json-server
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+
+      # Set up Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Install dependencies
+      - run: npm install
+
+      # Build Vite frontend
+      - run: npm run build
+
+      # Start json-server in background
+      - run: nohup npx json-server --watch db.json --port 3001 >/dev/null 2>&1 &
+
+      # Deploy to GitHub Pages (optional)
+      - uses: peaceiris/actions-gh-pages@v3
+        if: success()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
